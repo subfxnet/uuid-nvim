@@ -8,10 +8,12 @@
 --- @usage require("uuid-nvim").setup({ case = "upper", quotes = "single", suffix = "," })
 local uuid_nvim_setup = {
   case = "lower",
-  quotes = "double",
+  quotes = "none",
   insert = "after",
   prefix = "",
   suffix = "",
+  alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  length = 22,
   templates = {
     v4 = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx",
   },
@@ -39,6 +41,14 @@ local function validate_config(config)
   local valid_insert_options = { before = true, after = true }
   if config.insert and not valid_insert_options[config.insert] then
     error("Invalid 'insert' value. Must be 'before' or 'after'.")
+  end
+
+  if config.alphabet and type(config.alphabet) ~= "string" then
+    error("Invalid 'alphabet' value. Must be a string.")
+  end
+
+  if config.length and type(config.length) ~= "number" then
+    error("Invalid 'length' value.  Must be a number.")
   end
 
   if config.prefix and type(config.prefix) ~= "string" then
@@ -112,6 +122,54 @@ M.get_v4 = function(opts)
   end
 
   return uuid
+end
+
+--- Generate a random ShortUUID.
+--- @param opts UuidNvimSetup configuration overrides
+--- @return @string
+M.get_short = function(opts)
+  opts = vim.tbl_extend("force", uuid_nvim_setup, opts or {})
+
+  validate_config(opts)
+
+  local uuid = function(c)
+    local alen = string.len(opts.alphabet)
+    local u = {}
+    for i = 1, opts.length do
+      u[i] = string.byte(opts.alphabet, math.random(alen))
+    end
+    return string.char(table.unpack(u))
+  end
+
+  -- Convert to upper case if requested (always lower case by default)
+  if opts.case == "upper" then
+    uuid = string.upper(uuid)
+  end
+
+  if opts.quotes == "double" then
+    uuid = '"' .. uuid .. '"'
+  elseif opts.quotes == "single" then
+    uuid = "'" .. uuid .. "'"
+  end
+
+  if opts.prefix ~= "" then
+    uuid = opts.prefix .. uuid
+  end
+
+  if opts.suffix ~= "" then
+    uuid = uuid .. opts.suffix
+  end
+
+  return uuid
+end
+
+--- Insert a random ShortUUID at the current cusor position.
+--- param @opts UuidNvimSetup configuration overrides.
+M.insert_short = function(opts)
+  local uuid = M.get_short(opts)
+  local after = uuid_nvim_setup.insert == "after"
+
+  vim.api.nvim_put({ uuid }, "c", after, true)
 end
 
 --- Insert a v4 UUID at the current cursor position.
