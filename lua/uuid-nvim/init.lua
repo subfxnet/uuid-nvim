@@ -140,7 +140,7 @@ M.get_short = function(opts)
   for i = 1, opts.length do
     u[i] = string.byte(opts.alphabet, math.random(alen))
   end
-  local uuid = string.char(table.unpack(u))
+  local uuid = string.char(unpack(u))
 
   -- Convert to upper case if requested (always lower case by default)
   if opts.case == "upper" then
