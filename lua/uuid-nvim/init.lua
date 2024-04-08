@@ -3,6 +3,8 @@
 --- @field quotes string|nil the type of quotes to use, either "double", "single", or "none"
 --- @field prefix string|nil the prefix to prepend to the UUID.
 --- @field suffix string|nil the suffix to append to the UUID.
+--- @field alphabet string|nil the alphabet to use when generating ShortUUIDs.
+--- @field length number|nil the length of a random ShortUUID.
 --- @field templates table|nil the templates used to generate UUIDs.
 --- @field templates.v4 string|nil the template used to generate a v4 UUID.
 --- @usage require("uuid-nvim").setup({ case = "upper", quotes = "single", suffix = "," })
@@ -73,6 +75,7 @@ M.setup = function(opts)
 
   --- add neovim commands
   vim.cmd([[command! UuidV4 lua require('uuid-nvim').insert_v4()]])
+  vim.cmd([[command! ShortUUID lua require('uuid-nvim').insert_short()]])
   vim.cmd(
     [[command! UuidToggleHighlighting lua require('uuid-nvim').toggle_highlighting()]]
   )
@@ -126,20 +129,18 @@ end
 
 --- Generate a random ShortUUID.
 --- @param opts UuidNvimSetup configuration overrides
---- @return @string
+--- @return string
 M.get_short = function(opts)
   opts = vim.tbl_extend("force", uuid_nvim_setup, opts or {})
 
   validate_config(opts)
 
-  local uuid = function(c)
-    local alen = string.len(opts.alphabet)
-    local u = {}
-    for i = 1, opts.length do
-      u[i] = string.byte(opts.alphabet, math.random(alen))
-    end
-    return string.char(table.unpack(u))
+  local alen = string.len(opts.alphabet)
+  local u = {}
+  for i = 1, opts.length do
+    u[i] = string.byte(opts.alphabet, math.random(alen))
   end
+  local uuid = string.char(table.unpack(u))
 
   -- Convert to upper case if requested (always lower case by default)
   if opts.case == "upper" then
@@ -164,7 +165,7 @@ M.get_short = function(opts)
 end
 
 --- Insert a random ShortUUID at the current cusor position.
---- param @opts UuidNvimSetup configuration overrides.
+--- @param opts UuidNvimSetup configuration overrides.
 M.insert_short = function(opts)
   local uuid = M.get_short(opts)
   local after = uuid_nvim_setup.insert == "after"
