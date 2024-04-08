@@ -27,6 +27,8 @@ You can set up the plugin using the following fields:
 - insert:      string|nil Puts the UUID either "after" or "before" cursor.
 - prefix:      string|nil The prefix to prepend to the UUID.
 - suffix:      string|nil The suffix to append to the UUID.
+- alphabet:    string|nil The alphabet to use for generating ShortUUIDs.
+- length:      number|nil The length of the ShortUUID to generate.
 - templates:   table|nil  The templates used to generate UUIDs.
 - templates.v4:string|nil The template used to generate a v4 UUID.
 
@@ -52,6 +54,8 @@ FUNCTIONS                                                   *uuid-nvim-functions
 - get_setup()         Get the current configuration.
 - get_v4(opts)        Generate a v4 UUID.
 - insert_v4(opts)     Insert a v4 UUID at the current cursor position.
+- get_short(opts)     Generate a random ShortUUID.
+- insert_short(opts)  Insert a random ShortUUID at the current cursor postion.
 - toggle_highlighting Toggle UUID highlighting.
 
 ==============================================================================
