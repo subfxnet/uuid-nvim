@@ -138,9 +138,10 @@ M.get_short = function(opts)
   local alen = string.len(opts.alphabet)
   local u = {}
   for i = 1, opts.length do
-    u[i] = string.byte(opts.alphabet, math.random(alen))
+    local idx = math.random(alen)
+    u[i] = string.sub(opts.alphabet, idx, idx)
   end
-  local uuid = string.char(unpack(u))
+  local uuid = table.concat(u)
 
   -- Convert to upper case if requested (always lower case by default)
   if opts.case == "upper" then
